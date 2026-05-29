@@ -623,7 +623,6 @@ body  {
 }
 .he-filter__input:focus { border-color: var(--blue); }
 .he-filter__input::placeholder { color: var(--text3); }
-.he-filter__input--mat { max-width: 110px; flex: 0 0 110px; }
 
 /* HE footer cells */
 .he-foot {

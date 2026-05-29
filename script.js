@@ -112,11 +112,8 @@ function bindEvents() {
     if (!e.target.closest('.filter-bar__search-wrap')) closeSearch();
   });
 
-  /* Filtros HE */
-  document.getElementById('he-search-nome').addEventListener('input', () => {
-    if (METRICS) renderHETable(METRICS);
-  });
-  document.getElementById('he-search-mat').addEventListener('input', () => {
+  /* Filtro HE */
+  document.getElementById('he-search').addEventListener('input', () => {
     if (METRICS) renderHETable(METRICS);
   });
 
@@ -682,13 +679,14 @@ function renderDonut(m) {
    RENDER: HE TABLE
    ───────────────────────────────────────────────────────────────── */
 function renderHETable(m) {
-  const termNome = normalize(document.getElementById('he-search-nome').value.trim());
-  const termMat  = document.getElementById('he-search-mat').value.trim();
+  const term = document.getElementById('he-search').value.trim();
+  const termN = normalize(term);
 
   const lista = RAW.heSabado.filter(w => {
-    if (termNome && !normalize(w.n).includes(termNome)) return false;
-    if (termMat  && !String(w.mat ?? '').includes(termMat)) return false;
-    return true;
+    if (!term) return true;
+    if (normalize(w.n).includes(termN)) return true;
+    if (String(w.mat ?? '').includes(term)) return true;
+    return false;
   });
 
   document.getElementById('he-tbody').innerHTML = lista.length
