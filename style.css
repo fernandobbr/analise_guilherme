@@ -322,6 +322,7 @@ body  {
 .blk__analysis-list li {
   font-family: var(--f-sans);
   font-size: 12px;
+  font-weight: 700;
   color: var(--text);
   display: flex;
   gap: 7px;
@@ -598,6 +599,31 @@ body  {
 }
 .sbadge--s { color: var(--green); }
 .sbadge--n { color: var(--red);   }
+
+/* HE filter bar */
+.he-filter {
+  display: flex;
+  gap: 8px;
+  padding: 6px var(--pp);
+  border-bottom: 1px solid var(--border-lt);
+  background: var(--panel);
+  flex-shrink: 0;
+}
+.he-filter__input {
+  flex: 1;
+  border: 1px solid var(--border-lt);
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-family: var(--f-sans);
+  font-size: .72rem;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  min-width: 0;
+}
+.he-filter__input:focus { border-color: var(--blue); }
+.he-filter__input::placeholder { color: var(--text3); }
+.he-filter__input--mat { max-width: 110px; flex: 0 0 110px; }
 
 /* HE footer cells */
 .he-foot {

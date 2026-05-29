@@ -20,6 +20,7 @@ const DATAS_MAP = {Segunda:'18/05',Terca:'19/05',Quarta:'20/05',Quinta:'21/05',S
    ───────────────────────────────────────────────────────────────── */
 let RAW    = null;   /* dados carregados do JSON */
 let STATE  = { setor:'', turno:'' };
+let METRICS = null;  /* métricas do último renderAll */
 let searchTimer = null;
 
 /* ─────────────────────────────────────────────────────────────────
@@ -109,6 +110,14 @@ function bindEvents() {
   /* Fecha dropdown ao clicar fora */
   document.addEventListener('click', e => {
     if (!e.target.closest('.filter-bar__search-wrap')) closeSearch();
+  });
+
+  /* Filtros HE */
+  document.getElementById('he-search-nome').addEventListener('input', () => {
+    if (METRICS) renderHETable(METRICS);
+  });
+  document.getElementById('he-search-mat').addEventListener('input', () => {
+    if (METRICS) renderHETable(METRICS);
   });
 
   /* Modal */
@@ -304,6 +313,7 @@ function renderAll() {
   const mats       = colabs.map(c => c.mat).filter(Boolean);
   const registros  = getRegistrosForMats(mats);
   const m          = computeMetrics(colabs, registros);
+  METRICS          = m;
 
   const setorLabel = STATE.setor || 'Todos os Setores';
   const turnoLabel = STATE.turno || 'Todos os Turnos';
@@ -672,8 +682,17 @@ function renderDonut(m) {
    RENDER: HE TABLE
    ───────────────────────────────────────────────────────────────── */
 function renderHETable(m) {
-  document.getElementById('he-tbody').innerHTML =
-    RAW.heSabado.map((w,i)=>`
+  const termNome = normalize(document.getElementById('he-search-nome').value.trim());
+  const termMat  = document.getElementById('he-search-mat').value.trim();
+
+  const lista = RAW.heSabado.filter(w => {
+    if (termNome && !normalize(w.n).includes(termNome)) return false;
+    if (termMat  && !String(w.mat ?? '').includes(termMat)) return false;
+    return true;
+  });
+
+  document.getElementById('he-tbody').innerHTML = lista.length
+    ? lista.map((w,i)=>`
       <tr>
         <td class="col-n">${i+1}</td>
         <td style="font-family:var(--f-mono);font-size:.68rem">${w.mat ?? '—'}</td>
@@ -682,7 +701,8 @@ function renderHETable(m) {
         <td>${w.s?'<span class="sbadge sbadge--s">COMPARECEU</span>'
                :'<span class="sbadge sbadge--n">AUSENTE</span>'}</td>
         <td>${w.h>0 ? F.hMM(w.h) : '—'}</td>
-      </tr>`).join('');
+      </tr>`).join('')
+    : '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:16px">Nenhum resultado encontrado.</td></tr>';
 
   document.getElementById('he-foot').innerHTML=`
     <div class="he-foot__cell">
