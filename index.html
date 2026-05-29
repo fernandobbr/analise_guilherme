@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatório Semanal — Estamparia de Chapas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="page" id="dashboard">
+
+    <!-- ╔══════════════════════════════════════════════════════╗
+       ║                    HEADER                           ║
+       ╚══════════════════════════════════════════════════════╝ -->
+    <header class="hdr">
+      <div class="hdr__brand">
+        <img src="icons/silhueta-de-multiplos-usuarios.png" class="hdr__brand-icon" width="50" height="50" alt="Brand Icon" style="filter: invert(1) brightness(1.5);">
+        <div>
+          <h1 class="hdr__title">RELATÓRIO SEMANAL DO SETOR</h1>
+          <p class="hdr__sub">GESTÃO DE PESSOAS E PRODUTIVIDADE</p>
+        </div>
+      </div>
+
+      <div class="hdr__metas">
+        <div class="hdr__meta-box">
+          <img src="icons/calendario.png" alt="Calendário Icon" style="width: 38px; height: 38px; object-fit: contain; flex-shrink: 0; filter: invert(1) brightness(1.5);">
+          <div>
+            <div class="hdr__meta-lbl">PERÍODO:</div>
+            <div class="hdr__meta-val" id="hdr-periodo"></div>
+            <div class="hdr__meta-sub" id="hdr-semana"></div>
+          </div>
+        </div>
+
+        <div class="hdr__meta-box">
+          <img src="icons/industria.png" alt="Setor Icon" style="width: 38px; height: 38px; object-fit: contain; flex-shrink: 0; filter: invert(1) brightness(1.5);">
+          <div>
+            <div class="hdr__meta-lbl" id="hdr-setor-lbl">SETOR:</div>
+            <div class="hdr__meta-val" id="hdr-setor"></div>
+            <div class="hdr__meta-sub" id="hdr-turno-line" style="display:none">
+              TURNO: <span id="hdr-turno"></span>
+            </div>
+            <div class="hdr__meta-sub">SUPERVISOR: <span id="hdr-supervisor"></span></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ╔══════════════════════════════════════════════════════╗
+       ║                  KPI STRIP                          ║
+       ╚══════════════════════════════════════════════════════╝ -->
+    <!-- ╔══════════════════════════════════════════════════════╗
+       ║                  FILTER BAR                         ║
+       ╚══════════════════════════════════════════════════════╝ -->
+  <div class="filter-bar" role="search" aria-label="Filtros do dashboard">
+
+    <div class="filter-bar__group">
+      <label class="filter-bar__label" for="filter-setor">SETOR</label>
+      <select class="filter-bar__select" id="filter-setor">
+        <option value="">Todos os Setores</option>
+      </select>
+    </div>
+
+    <div class="filter-bar__group">
+      <label class="filter-bar__label" for="filter-turno">TURNO</label>
+      <select class="filter-bar__select" id="filter-turno">
+        <option value="">Todos os Turnos</option>
+      </select>
+    </div>
+
+    <div class="filter-bar__search-wrap">
+      <label class="filter-bar__label" for="search-colab">COLABORADOR</label>
+      <div class="search-field">
+        <svg class="search-field__ico" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+          <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input class="search-field__input" id="search-colab" type="text"
+               placeholder="Nome ou matrícula..." autocomplete="off" spellcheck="false"/>
+        <button class="search-field__clear" id="search-clear" aria-label="Limpar busca" hidden>✕</button>
+      </div>
+      <div class="search-dropdown" id="search-dropdown" hidden role="listbox"></div>
+    </div>
+
+    <button class="filter-bar__reset" id="filter-reset" title="Limpar todos os filtros">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      Limpar
+    </button>
+
+    <div class="filter-bar__active" id="filter-active-tags"></div>
+
+  </div>
+
+  <section class="kpi-strip" aria-label="Indicadores-chave">
+
+      <!-- KPI 1 – Colaboradores Ideais (excl. Afastados) -->
+      <div class="kpi">
+        <div class="kpi__head">
+          <img src="icons/silhueta-de-multiplos-usuarios.png" class="kpi__ico kpi__ico--blue" width="26" height="26" alt="Icon" style="filter: invert(27%) sepia(51%) saturate(2878%) hue-rotate(195deg) brightness(96%) contrast(96%);">
+          <span class="kpi__lbl">COLABORADORES<br>IDEAIS</span>
+        </div>
+        <div class="kpi__num" id="kv-ideal" style="text-align: center;">—</div>
+        <div class="kpi__sub kpi__sub--center">EXCL. AFASTADOS</div>
+      </div>
+
+      <!-- KPI 2 – Status dos Colaboradores (Ativo / Vagas / Afastado) -->
+      <div class="kpi kpi--status">
+        <div class="kpi__head">
+          <img src="icons/silhueta-de-multiplos-usuarios.png" class="kpi__ico kpi__ico--indigo" width="26" height="26" alt="Icon" style="filter: invert(42%) sepia(61%) saturate(464%) hue-rotate(78deg) brightness(96%) contrast(90%);">
+          <span class="kpi__lbl">STATUS<br>COLABORADORES</span>
+        </div>
+        <div class="kpi__status-row">
+          <div class="kpi__status-col">
+            <div class="kpi__status-val kpi__status-val--green" id="kv-status-ativo">—</div>
+            <div class="kpi__status-lbl">ATIVOS</div>
+          </div>
+          <div class="kpi__status-sep"></div>
+          <div class="kpi__status-col">
+            <div class="kpi__status-val kpi__status-val--orange" id="kv-status-vagas">—</div>
+            <div class="kpi__status-lbl">VAGAS</div>
+          </div>
+          <div class="kpi__status-sep"></div>
+          <div class="kpi__status-col">
+            <div class="kpi__status-val kpi__status-val--red" id="kv-status-afas">—</div>
+            <div class="kpi__status-lbl">AFASTADOS</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI 3 – Presença Média (ring) -->
+      <div class="kpi kpi--ring">
+        <div class="kpi__lbl kpi__lbl--center">PRESENÇA MÉDIA</div>
+        <div class="kpi__ring-wrap" aria-hidden="true">
+          <svg class="kpi__ring-svg" width="80" height="80" viewBox="0 0 80 80">
+            <circle class="ring-bg" cx="40" cy="40" r="32" />
+            <circle class="ring-fill" cx="40" cy="40" r="32" id="ring-arc" stroke-dasharray="0 201"
+              stroke-dashoffset="0" />
+          </svg>
+          <span class="kpi__ring-pct" id="kv-presenca-pct">—%</span>
+        </div>
+        <div class="kpi__sub kpi__sub--center">ÍNDICE DE PRESENÇA</div>
+      </div>
+
+      <div class="kpi-divider" aria-hidden="true"></div>
+
+      <!-- KPI 4 – Horas Trabalhadas -->
+      <div class="kpi kpi--hero">
+        <div class="kpi__head">
+          <svg class="kpi__ico kpi__ico--clock" width="26" height="26" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
+            <path d="M12 7v5l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          <span class="kpi__lbl">HORAS TRABALHADAS<br>(SEG A SEX)</span>
+        </div>
+        <div class="kpi__hero-num" id="kv-htrab">—</div>
+        <div class="kpi__sub">TOTAL DA SEMANA</div>
+      </div>
+
+      <!-- KPI 5 – Horas Perdidas -->
+      <div class="kpi kpi--hero kpi--alert">
+        <div class="kpi__head">
+          <svg class="kpi__ico kpi__ico--warn" width="26" height="26" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3 2 21h20L12 3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+            <path d="M12 10v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+            <circle cx="12" cy="17.5" r="1.1" fill="currentColor" />
+          </svg>
+          <span class="kpi__lbl">HORAS PERDIDAS<br>(FALTAS/ATESTADOS)</span>
+        </div>
+        <div class="kpi__hero-num kpi__hero-num--red" id="kv-hperd">—</div>
+        <div class="kpi__sub">TOTAL DA SEMANA</div>
+      </div>
+
+      <!-- KPI 6 – Horas Extras Sábado -->
+      <div class="kpi kpi--hero">
+        <div class="kpi__head">
+          <svg class="kpi__ico kpi__ico--purple" width="26" height="26" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
+            <path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <path d="M17.5 3.5l1.5 1.5M6.5 3.5L5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+          <span class="kpi__lbl">HORAS EXTRAS<br>SÁBADO</span>
+        </div>
+        <div class="kpi__hero-num" id="kv-he">—</div>
+        <div class="kpi__sub">TOTAL REALIZADO</div>
+      </div>
+
+    </section>
+
+    <!-- ╔══════════════════════════════════════════════════════╗
+       ║               OPERATIONAL PANELS                    ║
+       ╚══════════════════════════════════════════════════════╝ -->
+    <section class="ops-grid">
+
+      <!-- ─── COMPARATIVO DIÁRIO ─── -->
+      <div class="blk blk--comparativo">
+        <div class="blk__hdr">COMPARATIVO DIÁRIO (SEG A SEX)</div>
+        <table class="dtable" id="daily-table">
+          <thead>
+            <tr>
+              <th class="ta-l">DIA</th>
+              <th>IDEAL</th>
+              <th>PRESENTES</th>
+              <th>FALTAS</th>
+              <th>MEIO PERÍODO</th>
+              <th>ATESTADOS</th>
+              <th>TOTAL AUSÊNCIAS</th>
+              <th>% PRESENÇA</th>
+            </tr>
+          </thead>
+          <tbody id="daily-tbody"></tbody>
+          <tfoot id="daily-tfoot"></tfoot>
+        </table>
+      </div>
+
+      <!-- ─── HORAS PRODUÇÃO ─── -->
+      <div class="blk blk--horas">
+        <div class="blk__hdr">HORAS — PRODUÇÃO NORMAL (SEG A SEX)</div>
+        <div class="blk__body">
+          <div class="hrow" id="hrow-prev">
+            <span class="hrow__lbl">HORAS PREVISTAS</span>
+            <span class="hrow__val" id="kv-hprev"></span>
+          </div>
+          <div class="hrow hrow--hl-blue" id="hrow-trab">
+            <span class="hrow__lbl">HORAS TRABALHADAS</span>
+            <span class="hrow__val hrow__val--blue" id="kv-htrab2"></span>
+          </div>
+          <div class="hrow hrow--hl-red" id="hrow-perd">
+            <span class="hrow__lbl">HORAS PERDIDAS</span>
+            <span class="hrow__val hrow__val--red" id="kv-hperd2"></span>
+          </div>
+          <div class="efic" id="efic-block">
+            <span class="efic__lbl">EFICIÊNCIA DA SEMANA</span>
+            <span class="efic__val" id="kv-efic"></span>
+          </div>
+          <div class="blk__body--donut" style="border-top: 1px solid var(--border-lt); margin-top: 4px; padding-bottom: 0;">
+            <div id="donut-wrap" class="donut-wrap"></div>
+            <div id="donut-legend" class="donut-legend"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── PRESENÇA DIÁRIA (BAR CHART) ─── -->
+      <div class="blk blk--bar">
+        <div class="blk__hdr">PRESENÇA DIÁRIA (%)</div>
+        <div class="blk__body blk__body--chart">
+          <div id="bar-chart" class="bar-chart"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ╔══════════════════════════════════════════════════════╗
+       ║             CHARTS + TABLE ROW                      ║
+       ╚══════════════════════════════════════════════════════╝ -->
+    <section class="chart-grid">
+
+      <!-- ─── HORAS EXTRAS SÁBADO ─── -->
+      <div class="blk blk--he">
+        <div class="blk__hdr">HORAS EXTRAS — SÁBADO (05:00 ÀS 11:00)</div>
+        <div class="blk__body">
+          <div class="hrow2" id="he-conv">
+            <span class="hrow2__lbl">COLABORADORES CONVOCADOS</span>
+            <span class="hrow2__val" id="kv-he-conv"></span>
+          </div>
+          <div class="hrow2" id="he-comp">
+            <span class="hrow2__lbl">COMPARECERAM</span>
+            <span class="hrow2__val hrow2__val--green" id="kv-he-comp"></span>
+          </div>
+          <div class="hrow2" id="he-aus">
+            <span class="hrow2__lbl">AUSENTES</span>
+            <span class="hrow2__val hrow2__val--red" id="kv-he-aus"></span>
+          </div>
+          <div class="hrow2 hrow2--sep"></div>
+          <div class="hrow2" id="he-hprev">
+            <span class="hrow2__lbl">HORAS PREVISTAS</span>
+            <span class="hrow2__val" id="kv-he-hprev"></span>
+          </div>
+          <div class="hrow2 hrow2--hl" id="he-hreal">
+            <span class="hrow2__lbl">HORAS REALIZADAS</span>
+            <span class="hrow2__val" id="kv-he-hreal"></span>
+          </div>
+          <div class="efic efic--green" id="aprov-block">
+            <span class="efic__lbl">APROVEITAMENTO</span>
+            <span class="efic__val" id="kv-aprov"></span>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ─── COMPARECIMENTO HE TABLE ─── -->
+      <div class="blk blk--hetable">
+        <div class="blk__hdr">COMPARECIMENTO — HORAS EXTRAS SÁBADO</div>
+        <div class="blk__body blk__body--scroll">
+          <table class="dtable dtable--he" id="he-table">
+            <thead>
+              <tr>
+                <th class="col-n">Nº</th>
+                <th class="ta-l">NOME</th>
+                <th>SITUAÇÃO</th>
+                <th>HORAS REALIZADAS</th>
+              </tr>
+            </thead>
+            <tbody id="he-tbody"></tbody>
+          </table>
+        </div>
+        <div class="he-foot" id="he-foot"></div>
+      </div>
+
+      <!-- ─── ANÁLISE SEMANAL ─── -->
+      <div class="blk blk--analysis">
+        <div class="blk__hdr">ANÁLISE DA SEMANA</div>
+        <ul id="analysis-text" class="blk__analysis-list"></ul>
+      </div>
+
+    </section>
+
+
+  <!-- ╔══════════════════════════════════════════════════════╗
+       ║             MODAL COLABORADOR                       ║
+       ╚══════════════════════════════════════════════════════╝ -->
+  <div class="modal-overlay" id="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box">
+      <div class="modal-box__hdr">
+        <div>
+          <div class="modal-box__title" id="modal-title"></div>
+          <div class="modal-box__meta"  id="modal-meta"></div>
+        </div>
+        <button class="modal-box__close" id="modal-close" aria-label="Fechar">✕</button>
+      </div>
+      <div class="modal-box__body" id="modal-body"></div>
+    </div>
+  </div>
+
+  </div><!-- /.page -->
+  <script src="dados.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
