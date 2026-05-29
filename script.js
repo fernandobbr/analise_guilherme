@@ -594,13 +594,6 @@ function renderBarChart(m) {
       </text>`);
   }
 
-  /* Linha de referência 100% (se dentro da escala) */
-  const ref100 = (1 >= minVal && 1 <= maxVal)
-    ? `<line x1="${padL}" y1="${yPx(1).toFixed(1)}" x2="${W-padR}" y2="${yPx(1).toFixed(1)}"
-             stroke="#e53935" stroke-width="1" stroke-dasharray="4,3" opacity="0.6"/>
-       <text x="${W-padR-2}" y="${(yPx(1)-3).toFixed(1)}" text-anchor="end"
-             font-family="IBM Plex Mono,monospace" font-size="8" fill="#e53935">100%</text>`
-    : '';
 
   const slotW = cW / m.porDia.length;
   const barW  = Math.min(slotW * 0.6, 54);
@@ -631,7 +624,7 @@ function renderBarChart(m) {
   document.getElementById('bar-chart').innerHTML = `
     <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}"
          role="img" aria-label="Presença diária">
-      ${yLabels.join('')}${ref100}${bars}${axes}
+      ${yLabels.join('')}${bars}${axes}
     </svg>`;
 }
 
