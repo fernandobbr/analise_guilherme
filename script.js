@@ -53,7 +53,6 @@ function populateSelects() {
   setores.forEach(s => {
     const o = document.createElement('option');
     o.value = s; o.textContent = s;
-    if (s === 'Estamparia de Chapas') o.selected = true;
     selSetor.appendChild(o);
   });
 
@@ -63,9 +62,6 @@ function populateSelects() {
     o.value = t; o.textContent = t;
     selTurno.appendChild(o);
   });
-
-  /* Inicializa estado com Estamparia de Chapas */
-  STATE.setor = 'Estamparia de Chapas';
 }
 
 /* ─────────────────────────────────────────────────────────────────
