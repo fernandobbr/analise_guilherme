@@ -679,13 +679,16 @@ function renderDonut(m) {
    RENDER: HE TABLE
    ───────────────────────────────────────────────────────────────── */
 function renderHETable(m) {
-  const term = document.getElementById('he-search').value.trim();
+  const term  = document.getElementById('he-search').value.trim();
   const termN = normalize(term);
 
   const lista = RAW.heSabado.filter(w => {
     if (!term) return true;
     if (normalize(w.n).includes(termN)) return true;
     if (String(w.mat ?? '').includes(term)) return true;
+    if (normalize(w.setor ?? '').includes(termN)) return true;
+    const situacao = w.s ? 'compareceu' : 'ausente';
+    if (situacao.includes(termN)) return true;
     return false;
   });
 
