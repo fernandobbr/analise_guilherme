@@ -265,12 +265,17 @@ function computeMetrics(colabs, registros) {
   const countAfas  = colabs.filter(c => c.status === 'Afastado').length;
   const avgIdeal   = countAtivo + countVagas;
 
-  /* ── HE Sábado (sempre Estamparia de Chapas, aba HE_SABADO) ── */
-  const heConv  = RAW.heSabado.length;
-  const heComp  = RAW.heSabado.filter(w => w.s).length;
+  /* ── HE Sábado — filtrado por setor/turno ── */
+  const heFiltrada = RAW.heSabado.filter(w => {
+    if (STATE.setor && w.setor !== STATE.setor) return false;
+    if (STATE.turno && w.turno !== STATE.turno) return false;
+    return true;
+  });
+  const heConv  = heFiltrada.length;
+  const heComp  = heFiltrada.filter(w => w.s).length;
   const heAus   = heConv - heComp;
   const hePrevH = heConv * HE_PREV_H;
-  const heTrabH = RAW.heSabado.reduce((s, w) => s + w.h, 0) / 3600;
+  const heTrabH = heFiltrada.reduce((s, w) => s + w.h, 0) / 3600;
   const heAprov = hePrevH > 0 ? heTrabH / hePrevH : 0;
 
   return {
@@ -278,6 +283,7 @@ function computeMetrics(colabs, registros) {
     countAtivo, countVagas, countAfas,
     hPrev, hTrab, hPerd, efic,
     heConv, heComp, heAus, hePrevH, heTrabH, heAprov,
+    heFiltrada,
     totalColabs: colabs.length,
   };
 }
@@ -682,7 +688,7 @@ function renderHETable(m) {
   const term  = document.getElementById('he-search').value.trim();
   const termN = normalize(term);
 
-  const lista = RAW.heSabado.filter(w => {
+  const lista = m.heFiltrada.filter(w => {
     if (!term) return true;
     if (normalize(w.n).includes(termN)) return true;
     if (String(w.mat ?? '').includes(term)) return true;
