@@ -576,7 +576,7 @@ function renderBarChart(m) {
 
   const pcts  = m.porDia.map(d => d.hPrev>0 ? d.hTrab/d.hPrev : 0);
   const minVal= Math.max(0, Math.min(...pcts) - 0.04);
-  const maxVal= Math.min(1, Math.max(...pcts) + 0.02);
+  const maxVal= Math.max(...pcts) + 0.06;          /* sem cap em 100% */
   const yRange= maxVal - minVal;
   const yPx   = v => padT + cH * (1 - (v-minVal)/yRange);
   const yH    = v => cH * ((v-minVal)/yRange);
@@ -594,6 +594,14 @@ function renderBarChart(m) {
       </text>`);
   }
 
+  /* Linha de referência 100% (se dentro da escala) */
+  const ref100 = (1 >= minVal && 1 <= maxVal)
+    ? `<line x1="${padL}" y1="${yPx(1).toFixed(1)}" x2="${W-padR}" y2="${yPx(1).toFixed(1)}"
+             stroke="#e53935" stroke-width="1" stroke-dasharray="4,3" opacity="0.6"/>
+       <text x="${W-padR-2}" y="${(yPx(1)-3).toFixed(1)}" text-anchor="end"
+             font-family="IBM Plex Mono,monospace" font-size="8" fill="#e53935">100%</text>`
+    : '';
+
   const slotW = cW / m.porDia.length;
   const barW  = Math.min(slotW * 0.6, 54);
 
@@ -602,10 +610,11 @@ function renderBarChart(m) {
     const cx  = padL + i*slotW + slotW/2;
     const bh  = Math.max(yH(pct), 1);
     const by  = yPx(pct);
+    const lblY = Math.max(by - 5, padT + 10); /* sempre dentro do SVG */
     return `
       <rect x="${(cx-barW/2).toFixed(1)}" y="${by.toFixed(1)}"
             width="${barW}" height="${bh.toFixed(1)}" fill="#2196f3" rx="2"/>
-      <text x="${cx.toFixed(1)}" y="${(by-5).toFixed(1)}" text-anchor="middle"
+      <text x="${cx.toFixed(1)}" y="${lblY.toFixed(1)}" text-anchor="middle"
             font-family="IBM Plex Mono,monospace" font-size="10" font-weight="700" fill="#1a3a6b">
         ${F.pct(pct)}
       </text>
@@ -622,7 +631,7 @@ function renderBarChart(m) {
   document.getElementById('bar-chart').innerHTML = `
     <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}"
          role="img" aria-label="Presença diária">
-      ${yLabels.join('')}${bars}${axes}
+      ${yLabels.join('')}${ref100}${bars}${axes}
     </svg>`;
 }
 
