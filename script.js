@@ -676,7 +676,9 @@ function renderHETable(m) {
     RAW.heSabado.map((w,i)=>`
       <tr>
         <td class="col-n">${i+1}</td>
+        <td style="font-family:var(--f-mono);font-size:.68rem">${w.mat ?? '—'}</td>
         <td class="ta-l nome-cell">${w.n}</td>
+        <td class="ta-l" style="font-size:.68rem;color:var(--text2)">${w.setor ?? '—'}</td>
         <td>${w.s?'<span class="sbadge sbadge--s">COMPARECEU</span>'
                :'<span class="sbadge sbadge--n">AUSENTE</span>'}</td>
         <td>${w.h>0 ? F.hMM(w.h) : '—'}</td>
