@@ -17,6 +17,26 @@
   <div class="page" id="dashboard">
 
     <!-- ╔══════════════════════════════════════════════════════╗
+       ║                  TOP ACTION BAR                      ║
+       ╚══════════════════════════════════════════════════════╝ -->
+    <div class="top-bar" role="toolbar" aria-label="Ações rápidas">
+      <a class="top-bar__btn" href="Dados1.xlsx" download title="Baixar planilha de dados (Dados1.xlsx)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 15l-5-5h3.5V4h3v6H17l-5 5z" fill="currentColor"/>
+          <path d="M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Baixar planilha
+      </a>
+      <button class="top-bar__btn" id="btn-reload" title="Recarregar dados do painel" aria-label="Recarregar dados do painel">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Recarregar dados
+      </button>
+    </div>
+
+    <!-- ╔══════════════════════════════════════════════════════╗
        ║                    HEADER                           ║
        ╚══════════════════════════════════════════════════════╝ -->
     <header class="hdr">
@@ -299,6 +319,7 @@
       <div class="blk blk--hetable">
         <div class="blk__hdr">COMPARECIMENTO — HORAS EXTRAS SÁBADO</div>
         <div class="he-filter">
+          <label class="sr-only" for="he-search">Buscar colaborador por nome ou matrícula</label>
           <input class="he-filter__input" id="he-search" type="text"
                  placeholder="Buscar por nome ou matrícula..." autocomplete="off" spellcheck="false"/>
         </div>

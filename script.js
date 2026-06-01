@@ -113,6 +113,9 @@ function bindEvents() {
     if (METRICS) renderHETable(METRICS);
   });
 
+  /* Reload */
+  document.getElementById('btn-reload').addEventListener('click', () => window.location.reload());
+
   /* Modal */
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('modal-overlay').addEventListener('click', e => {
@@ -646,20 +649,21 @@ function renderDonut(m) {
     { label:'HE Sábado',         val:m.heTrabH, color:'#8e24aa', fmt:F.h(m.heTrabH) },
   ];
 
-  const S=165, cx=S/2, cy=S/2, R=68, r=44;
+  const S=190, cx=S/2, cy=S/2, R=84, r=46;
   let angle=-Math.PI/2, paths='', labels='';
   slices.forEach(sl => {
     const sweep=(sl.val/total)*2*Math.PI;
     paths+=`<path d="${arcPath(cx,cy,R,r,angle,angle+sweep)}"
-                 fill="${sl.color}" stroke="white" stroke-width="1.5" opacity="0.92"/>`;
+                 fill="${sl.color}" stroke="white" stroke-width="1.5" opacity="0.93"/>`;
     const pv=sl.val/total;
-    if(pv>.05){
+    if(pv>.02){
       const mid=angle+sweep/2, lr=r+(R-r)/2;
+      const fs = pv>.15 ? 10 : pv>.07 ? 9 : 8;
       labels+=`<text x="${(cx+lr*Math.cos(mid)).toFixed(1)}"
                      y="${(cy+lr*Math.sin(mid)).toFixed(1)}"
                      text-anchor="middle" dominant-baseline="middle"
                      font-family="IBM Plex Mono,monospace"
-                     font-size="${pv>.12?10:8.5}" font-weight="700" fill="#111">
+                     font-size="${fs}" font-weight="700" fill="#fff">
                  ${(pv*100).toFixed(1).replace('.',',')}%
                </text>`;
     }
