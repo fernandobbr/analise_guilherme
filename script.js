@@ -247,15 +247,17 @@ function computeMetrics(colabs, registros) {
     day.hTrab += r.t;
     const mot = (r.o || '').toUpperCase();
 
-    if (mot.includes('FALTA') && !mot.includes('JUSTIF') && !isAfastFormal(r.o)) {
-      if (r.t === 0) {
-        day.faltasMat.add(r.m);    /* dia inteiro */
-      } else {
+    if (!isAfastFormal(r.o)) {
+      if (r.t === 0 && r.p > 0) {
+        /* Ausência dia inteiro — com ou sem motivo registrado */
+        if (mot.includes('ATESTADO') || mot.includes('DECLARACAO')) {
+          day.atestadosMat.add(r.m);
+        } else {
+          day.faltasMat.add(r.m);
+        }
+      } else if (r.t > 0 && mot.includes('FALTA') && !mot.includes('JUSTIF')) {
         day.meioPerMat.add(r.m);   /* meio período — trabalhou mas faltou parte */
       }
-    }
-    if ((mot.includes('ATESTADO') || mot.includes('DECLARACAO')) && !isAfastFormal(r.o)) {
-      day.atestadosMat.add(r.m);
     }
     if (mot.includes('ATRASO') || mot.includes('ANTECIPADA')) day.atrasos++;
   });
