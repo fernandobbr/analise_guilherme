@@ -295,10 +295,8 @@ function computeMetrics(colabs, registros) {
   const countAfas  = colabs.filter(c => c.status === 'Afastado').length;
   const avgIdeal   = countAtivo + countVagas;
 
-  /* % presença baseada em headcount: presentes / ideal por dia */
-  const avgPct = avgIdeal > 0
-    ? porDia.reduce((s,d) => s + d.presentes / avgIdeal, 0) / porDia.length
-    : 0;
+  /* % presença: presentes / pessoas com registro naquele dia (exclui vagas sem funcionário) */
+  const avgPct = porDia.reduce((s,d) => s + (d.ideal > 0 ? d.presentes / d.ideal : 0), 0) / porDia.length;
 
   /* ── HE Sábado — filtrado por setor/turno ── */
   const heFiltrada = RAW.heSabado.filter(w => {
@@ -445,7 +443,7 @@ function renderKPIs(m) {
 function renderDailyTable(m) {
   document.getElementById('daily-tbody').innerHTML =
     m.porDia.map(d => {
-      const pct = m.avgIdeal > 0 ? d.presentes / m.avgIdeal : 0;
+      const pct = d.ideal > 0 ? d.presentes / d.ideal : 0;
       return `
         <tr class="dtable__row--clickable" data-dia="${d.dia}" title="Clique para ver detalhes de ${d.dia}">
           <td class="ta-l">${d.dia}<span class="row-detail-hint">▶</span></td>
