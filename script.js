@@ -245,7 +245,6 @@ function computeMetrics(colabs, registros) {
     if (r.t > 0) day.presentes.add(r.m);
     day.hPrev += r.p;
     day.hTrab += r.t;
-    day.hPerd += r.x;
     const mot = (r.o || '').toUpperCase();
 
     if (mot.includes('FALTA') && !mot.includes('JUSTIF') && !isAfastFormal(r.o)) {
@@ -266,10 +265,11 @@ function computeMetrics(colabs, registros) {
     const faltas    = bd.faltasMat.size;
     const meioPer   = bd.meioPerMat.size;
     const atestados = bd.atestadosMat.size;
-    /* TOTAL AUSÊNCIAS = faltas + meio período + atestados */
-    const aus = faltas + meioPer + atestados;
+    const aus       = faltas + meioPer + atestados;
+    const hPerd     = Math.max(0, bd.hPrev - bd.hTrab);
     return {
       ...bd,
+      hPerd,
       ideal:     bd.colabs.size,
       presentes: bd.presentes.size,
       faltas,
@@ -352,7 +352,7 @@ function setContentVisible(visible) {
 }
 
 function renderAll() {
-  if (!STATE.setor && !STATE.turno) {
+  if (!RAW || !RAW.colabs || RAW.colabs.length === 0) {
     setContentVisible(false);
     renderHeader();
     return;
@@ -1048,11 +1048,11 @@ function reloadFromData(newData) {
   const novosSetores = [...new Set(newData.colabs.map(c => c.setor).filter(Boolean))].sort();
   const novosTurnos  = new Set(newData.colabs.map(c => c.turno).filter(Boolean));
 
-  /* Preserva filtro anterior se ainda existe; senão usa o primeiro setor disponível */
-  const novoSetor = novosSetores.includes(prevSetor) ? prevSetor : (novosSetores[0] || '');
-  const novoTurno = novosTurnos.has(prevTurno) ? prevTurno : '';
-
-  STATE = { setor: novoSetor, turno: novoTurno };
+  /* Preserva filtro anterior se ainda existe; senão mantém "Todos" */
+  STATE = {
+    setor: novosSetores.includes(prevSetor) ? prevSetor : '',
+    turno: novosTurnos.has(prevTurno)       ? prevTurno : '',
+  };
 
   document.getElementById('filter-setor').innerHTML = '<option value="">Todos os Setores</option>';
   document.getElementById('filter-turno').innerHTML = '<option value="">Todos os Turnos</option>';
