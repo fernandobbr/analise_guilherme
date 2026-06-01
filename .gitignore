@@ -1,0 +1,33 @@
+# Planilhas de dados — não versionar
+*.xlsx
+*.xls
+*.xlsm
+*.xlsb
+
+# Arquivos de dados brutos / exportações
+*.csv
+*.json
+dados_dashboard.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Imagens soltas (não são assets do projeto)
+*.jpeg
+*.jpg
+*.png
+!icons/*.png
+
+# Editor / IDE
+.vscode/
+*.code-workspace
