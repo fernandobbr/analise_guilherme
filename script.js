@@ -1045,13 +1045,14 @@ function reloadFromData(newData) {
 
   RAW = newData;
 
-  const novosSetores = new Set(newData.colabs.map(c => c.setor).filter(Boolean));
+  const novosSetores = [...new Set(newData.colabs.map(c => c.setor).filter(Boolean))].sort();
   const novosTurnos  = new Set(newData.colabs.map(c => c.turno).filter(Boolean));
 
-  STATE = {
-    setor: novosSetores.has(prevSetor) ? prevSetor : '',
-    turno: novosTurnos.has(prevTurno)  ? prevTurno  : '',
-  };
+  /* Preserva filtro anterior se ainda existe; senão usa o primeiro setor disponível */
+  const novoSetor = novosSetores.includes(prevSetor) ? prevSetor : (novosSetores[0] || '');
+  const novoTurno = novosTurnos.has(prevTurno) ? prevTurno : '';
+
+  STATE = { setor: novoSetor, turno: novoTurno };
 
   document.getElementById('filter-setor').innerHTML = '<option value="">Todos os Setores</option>';
   document.getElementById('filter-turno').innerHTML = '<option value="">Todos os Turnos</option>';
