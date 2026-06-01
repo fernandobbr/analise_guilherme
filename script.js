@@ -124,15 +124,22 @@ function bindEvents() {
     const labelText = document.getElementById('upload-label-text');
     labelText.textContent = 'Processando…';
     const reader = new FileReader();
+    reader.onerror = function() {
+      labelText.textContent = 'Carregar planilha';
+      alert('Não foi possível ler o arquivo.');
+    };
     reader.onload = function(ev) {
       try {
         const data = parseXlsxData(ev.target.result);
+        console.log('[upload] colabs:', data.colabs.length, '| registros:', data.registros.length, '| HE:', data.heSabado.length);
         reloadFromData(data);
-        labelText.textContent = `✓ ${data.colabs.length} colaboradores`;
-        setTimeout(() => { labelText.textContent = 'Carregar planilha'; }, 4000);
+        labelText.textContent = `✓ ${data.colabs.length} colab. / ${data.registros.length} reg.`;
+        setTimeout(() => { labelText.textContent = 'Carregar planilha'; }, 5000);
       } catch(err) {
-        labelText.textContent = 'Carregar planilha';
-        alert('Erro ao processar planilha:\n\n' + err.message + '\n\nVerifique se a planilha possui as abas: Dados_Colaboradores, dados, HE_SABADO');
+        console.error('[upload] erro:', err);
+        labelText.textContent = 'Erro — ver console';
+        alert('Erro ao processar planilha:\n\n' + err.message);
+        setTimeout(() => { labelText.textContent = 'Carregar planilha'; }, 4000);
       }
       e.target.value = '';
     };
@@ -938,13 +945,35 @@ function xlTimeToH(v) {
   return 0.0;
 }
 
+/* Extrai o dia da semana (0=Dom … 6=Sáb) de um valor de data do Excel:
+   pode chegar como Date (cellDates), número serial ou string dd/mm/yyyy */
+function xlDateWD(v) {
+  if (!v) return null;
+  if (v instanceof Date) return v.getUTCDay();
+  if (typeof v === 'number' && v > 0) {
+    const d = new Date(Date.UTC(1899, 11, 30) + Math.floor(v) * 86400000);
+    return d.getUTCDay();
+  }
+  if (typeof v === 'string') {
+    const p = v.split(/[\/\-\.]/);
+    if (p.length === 3) {
+      const d = new Date(Date.UTC(+p[2], +p[1] - 1, +p[0]));
+      if (!isNaN(d)) return d.getUTCDay();
+    }
+  }
+  return null;
+}
+
 function parseXlsxData(buffer) {
   if (typeof XLSX === 'undefined') throw new Error('Biblioteca XLSX não carregada. Verifique a conexão com a internet.');
+
   const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
+  const abas = wb.SheetNames.join(', ');
+  console.log('[xlsx] abas encontradas:', abas);
 
   /* ── 1. Colaboradores ── */
   const ws_c = wb.Sheets['Dados_Colaboradores'];
-  if (!ws_c) throw new Error('Aba "Dados_Colaboradores" não encontrada na planilha.');
+  if (!ws_c) throw new Error(`Aba "Dados_Colaboradores" não encontrada.\nAbas disponíveis: ${abas}`);
   const rows_c = XLSX.utils.sheet_to_json(ws_c, { header: 1, defval: null });
   const colabs = [];
   const mat_lookup = {};
@@ -964,20 +993,18 @@ function parseXlsxData(buffer) {
   /* ── 2. Registros diários (Seg–Sex) ── */
   const DAY_JS = {1:'Segunda', 2:'Terca', 3:'Quarta', 4:'Quinta', 5:'Sexta'};
   const ws_d = wb.Sheets['dados'];
-  if (!ws_d) throw new Error('Aba "dados" não encontrada na planilha.');
+  if (!ws_d) throw new Error(`Aba "dados" não encontrada.\nAbas disponíveis: ${abas}`);
   const rows_d = XLSX.utils.sheet_to_json(ws_d, { header: 1, cellDates: true, defval: null });
   const registros = [];
   for (let i = 1; i < rows_d.length; i++) {
     const r = rows_d[i];
-    const data = r[0], mat = r[1];
-    if (!data || !mat) continue;
-    if (!(data instanceof Date)) continue;
-    const wd = data.getUTCDay();
-    if (!DAY_JS[wd]) continue;
+    if (!r[0] || !r[1]) continue;
+    const wd = xlDateWD(r[0]);
+    if (wd === null || !DAY_JS[wd]) continue;
     let o = r[7] != null ? String(r[7]).trim() : '';
     if (o === '-' || o === 'None') o = '';
     registros.push({
-      m: parseInt(mat),
+      m: parseInt(r[1]),
       d: DAY_JS[wd],
       p: xlTimeToH(r[2]),
       t: xlTimeToH(r[3]),
@@ -988,15 +1015,19 @@ function parseXlsxData(buffer) {
 
   /* ── 3. HE Sábado (semana mais recente) ── */
   const ws_he = wb.Sheets['HE_SABADO'];
-  if (!ws_he) throw new Error('Aba "HE_SABADO" não encontrada na planilha.');
-  const rows_he_raw = XLSX.utils.sheet_to_json(ws_he, { header: 1, defval: null });
+  if (!ws_he) throw new Error(`Aba "HE_SABADO" não encontrada.\nAbas disponíveis: ${abas}`);
+  const rows_he_raw = XLSX.utils.sheet_to_json(ws_he, { header: 1, cellDates: true, defval: null });
   const rows_he = rows_he_raw.slice(1).filter(r => r[0] != null);
+
+  /* semana mais recente — compara por timestamp se for Date, senão por valor */
+  const toNum = v => v instanceof Date ? v.getTime() : Number(v);
   const sem_max = rows_he.length
-    ? rows_he.reduce((mx, r) => (r[0] > mx ? r[0] : mx), rows_he[0][0])
+    ? rows_he.reduce((mx, r) => toNum(r[0]) > toNum(mx) ? r[0] : mx, rows_he[0][0])
     : null;
+
   const he_sabado = [];
   for (const r of rows_he) {
-    if (r[0] !== sem_max) continue;
+    if (toNum(r[0]) !== toNum(sem_max)) continue;
     const mat  = r[1] != null ? parseInt(r[1]) : null;
     const nome = r[2] != null ? String(r[2]).trim() : '';
     const s    = r[4] != null ? String(r[4]).toUpperCase().trim() === 'SIM' : false;
