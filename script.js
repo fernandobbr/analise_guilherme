@@ -287,10 +287,6 @@ function computeMetrics(colabs, registros) {
   const hPerd  = porDia.reduce((s,d) => s + d.hPerd, 0);
   const efic   = hPrev > 0 ? hTrab / hPrev : 0;
   const avgPres= porDia.reduce((s,d) => s + d.presentes, 0) / porDia.length;
-  /* % presença baseada em headcount: presentes / ideal por dia */
-  const avgPct = avgIdeal > 0
-    ? porDia.reduce((s,d) => s + d.presentes / avgIdeal, 0) / porDia.length
-    : 0;
 
   /* Headcount por status — aba Dados_Colaboradores filtrada por setor+turno
      Ideal = Ativos + Vagas Abertas (exclui Afastados conforme regra de negócio) */
@@ -298,6 +294,11 @@ function computeMetrics(colabs, registros) {
   const countVagas = colabs.filter(c => c.status === 'Vaga Aberta').length;
   const countAfas  = colabs.filter(c => c.status === 'Afastado').length;
   const avgIdeal   = countAtivo + countVagas;
+
+  /* % presença baseada em headcount: presentes / ideal por dia */
+  const avgPct = avgIdeal > 0
+    ? porDia.reduce((s,d) => s + d.presentes / avgIdeal, 0) / porDia.length
+    : 0;
 
   /* ── HE Sábado — filtrado por setor/turno ── */
   const heFiltrada = RAW.heSabado.filter(w => {
