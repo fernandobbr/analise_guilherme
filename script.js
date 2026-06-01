@@ -488,8 +488,11 @@ function openDayDetail(dia, m) {
   const matSet    = new Set(colabs.map(c => c.mat).filter(Boolean));
   const colabMap  = Object.fromEntries(colabs.map(c => [c.mat, c]));
 
+  /* Converte label (ex: 'Terça') para chave raw dos registros (ex: 'Terca') */
+  const diaRaw  = Object.keys(DIAS_LABEL).find(k => DIAS_LABEL[k] === dia) || dia;
+
   /* Registros do dia selecionado */
-  const regsDay   = RAW.registros.filter(r => r.d === dia && matSet.has(r.m));
+  const regsDay = RAW.registros.filter(r => r.d === diaRaw && matSet.has(r.m));
 
   /* Dados do dia nos metrics */
   const diaData   = m.porDia.find(d => d.dia === dia || d.dia === DIAS_LABEL[Object.keys(DIAS_LABEL).find(k => DIAS_LABEL[k] === dia)]);
