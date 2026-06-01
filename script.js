@@ -333,7 +333,26 @@ function pBadge(pct) {
 /* ─────────────────────────────────────────────────────────────────
    RENDER ALL — ponto de entrada principal
    ───────────────────────────────────────────────────────────────── */
+const CONTENT_SECTIONS = ['.kpi-strip', '.ops-grid', '.chart-grid'];
+
+function setContentVisible(visible) {
+  const msg = document.getElementById('no-filter-msg');
+  msg.hidden = visible;
+  CONTENT_SECTIONS.forEach(sel => {
+    const el = document.querySelector(sel);
+    if (el) el.hidden = !visible;
+  });
+}
+
 function renderAll() {
+  if (!STATE.setor && !STATE.turno) {
+    setContentVisible(false);
+    renderHeader();
+    return;
+  }
+
+  setContentVisible(true);
+
   const colabs     = getFilteredColabs();
   const mats       = colabs.map(c => c.mat).filter(Boolean);
   const registros  = getRegistrosForMats(mats);

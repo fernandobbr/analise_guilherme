@@ -1405,6 +1405,33 @@ body  {
 .modal-motivo--alert { color: var(--red); }
 
 /* ════════════════════════════════════════════════════════════════════
+   ESTADO SEM FILTRO
+   ════════════════════════════════════════════════════════════════════ */
+#no-filter-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 72px var(--ph);
+  color: var(--text3);
+}
+
+#no-filter-msg svg {
+  opacity: .35;
+}
+
+#no-filter-msg p {
+  font-size: .9rem;
+  color: var(--text2);
+  text-align: center;
+}
+
+#no-filter-msg p strong {
+  color: var(--blue);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    ACCESSIBILITY UTILITIES
    ════════════════════════════════════════════════════════════════════ */
 .sr-only {
