@@ -128,11 +128,11 @@ function bindEvents() {
       try {
         const data = parseXlsxData(ev.target.result);
         reloadFromData(data);
-        labelText.textContent = '✓ Atualizado';
-        setTimeout(() => { labelText.textContent = 'Carregar planilha'; }, 3000);
+        labelText.textContent = `✓ ${data.colabs.length} colaboradores`;
+        setTimeout(() => { labelText.textContent = 'Carregar planilha'; }, 4000);
       } catch(err) {
         labelText.textContent = 'Carregar planilha';
-        alert('Erro ao processar planilha:\n' + err.message);
+        alert('Erro ao processar planilha:\n\n' + err.message + '\n\nVerifique se a planilha possui as abas: Dados_Colaboradores, dados, HE_SABADO');
       }
       e.target.value = '';
     };
@@ -1009,14 +1009,27 @@ function parseXlsxData(buffer) {
 }
 
 function reloadFromData(newData) {
+  const prevSetor = STATE.setor;
+  const prevTurno = STATE.turno;
+
   RAW = newData;
-  STATE = { setor: '', turno: '' };
+
+  const novosSetores = new Set(newData.colabs.map(c => c.setor).filter(Boolean));
+  const novosTurnos  = new Set(newData.colabs.map(c => c.turno).filter(Boolean));
+
+  STATE = {
+    setor: novosSetores.has(prevSetor) ? prevSetor : '',
+    turno: novosTurnos.has(prevTurno)  ? prevTurno  : '',
+  };
+
   document.getElementById('filter-setor').innerHTML = '<option value="">Todos os Setores</option>';
   document.getElementById('filter-turno').innerHTML = '<option value="">Todos os Turnos</option>';
   document.getElementById('search-colab').value = '';
   document.getElementById('search-clear').hidden = true;
   closeSearch();
   populateSelects();
+  document.getElementById('filter-setor').value = STATE.setor;
+  document.getElementById('filter-turno').value = STATE.turno;
   updateActiveTags();
   renderAll();
 }
