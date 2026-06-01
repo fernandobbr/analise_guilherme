@@ -139,9 +139,6 @@ function bindEvents() {
     reader.readAsArrayBuffer(file);
   });
 
-  /* Reload */
-  document.getElementById('btn-reload').addEventListener('click', () => window.location.reload());
-
   /* Modal */
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('modal-overlay').addEventListener('click', e => {
