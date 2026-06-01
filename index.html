@@ -20,13 +20,14 @@
        ║                  TOP ACTION BAR                      ║
        ╚══════════════════════════════════════════════════════╝ -->
     <div class="top-bar" role="toolbar" aria-label="Ações rápidas">
-      <a class="top-bar__btn" href="Dados1.xlsx" download title="Baixar planilha de dados (Dados1.xlsx)">
+      <button class="top-bar__btn" id="btn-upload" title="Carregar nova planilha de dados (.xlsx)" aria-label="Carregar nova planilha de dados">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 15l-5-5h3.5V4h3v6H17l-5 5z" fill="currentColor"/>
+          <path d="M12 3l5 5h-3.5v7h-3V8H7l5-5z" fill="currentColor"/>
           <path d="M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
-        Baixar planilha
-      </a>
+        <span id="upload-label-text">Carregar planilha</span>
+      </button>
+      <input type="file" id="xlsx-input" accept=".xlsx,.xls" aria-hidden="true" style="display:none">
       <button class="top-bar__btn" id="btn-reload" title="Recarregar dados do painel" aria-label="Recarregar dados do painel">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -367,6 +368,7 @@
   </div>
 
   </div><!-- /.page -->
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
   <script src="dados.js"></script>
   <script src="script.js"></script>
 </body>

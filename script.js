@@ -113,6 +113,32 @@ function bindEvents() {
     if (METRICS) renderHETable(METRICS);
   });
 
+  /* Upload planilha */
+  document.getElementById('btn-upload').addEventListener('click', () => {
+    document.getElementById('xlsx-input').click();
+  });
+
+  document.getElementById('xlsx-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const labelText = document.getElementById('upload-label-text');
+    labelText.textContent = 'Processando…';
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        const data = parseXlsxData(ev.target.result);
+        reloadFromData(data);
+        labelText.textContent = '✓ Atualizado';
+        setTimeout(() => { labelText.textContent = 'Carregar planilha'; }, 3000);
+      } catch(err) {
+        labelText.textContent = 'Carregar planilha';
+        alert('Erro ao processar planilha:\n' + err.message);
+      }
+      e.target.value = '';
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
   /* Reload */
   document.getElementById('btn-reload').addEventListener('click', () => window.location.reload());
 
@@ -872,6 +898,111 @@ function openColabModal(mat) {
 
 function closeModal() {
   document.getElementById('modal-overlay').hidden = true;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   XLSX UPLOAD — parsing e recarga de dados
+   ───────────────────────────────────────────────────────────────── */
+function cleanNome(s) {
+  if (!s) return null;
+  s = String(s).trim();
+  const idx = s.indexOf(' - ');
+  return idx >= 0 ? s.slice(0, idx).trim() : s;
+}
+
+function xlTimeToH(v) {
+  if (v == null) return 0.0;
+  if (v instanceof Date) {
+    return Math.round((v.getUTCHours() + v.getUTCMinutes()/60 + v.getUTCSeconds()/3600) * 10000) / 10000;
+  }
+  if (typeof v === 'number') {
+    const frac = v - Math.floor(v);
+    return Math.round(frac * 24 * 10000) / 10000;
+  }
+  return 0.0;
+}
+
+function parseXlsxData(buffer) {
+  if (typeof XLSX === 'undefined') throw new Error('Biblioteca XLSX não carregada. Verifique a conexão com a internet.');
+  const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
+
+  /* ── 1. Colaboradores ── */
+  const ws_c = wb.Sheets['Dados_Colaboradores'];
+  if (!ws_c) throw new Error('Aba "Dados_Colaboradores" não encontrada na planilha.');
+  const rows_c = XLSX.utils.sheet_to_json(ws_c, { header: 1, defval: null });
+  const colabs = [];
+  const mat_lookup = {};
+  for (let i = 1; i < rows_c.length; i++) {
+    const r = rows_c[i];
+    if (!r[1] && !r[0]) continue;
+    if (!r[2]) continue;
+    const mat   = r[0] != null ? parseInt(r[0]) : null;
+    const nome  = cleanNome(r[1]);
+    const setor = r[2] != null ? String(r[2]).trim() : null;
+    const turno = r[3] != null ? String(r[3]).trim() : null;
+    const status= r[4] != null ? String(r[4]).trim() : null;
+    colabs.push({ mat, nome, setor, turno, status });
+    if (mat) mat_lookup[mat] = { setor, turno };
+  }
+
+  /* ── 2. Registros diários (Seg–Sex) ── */
+  const DAY_JS = {1:'Segunda', 2:'Terca', 3:'Quarta', 4:'Quinta', 5:'Sexta'};
+  const ws_d = wb.Sheets['dados'];
+  if (!ws_d) throw new Error('Aba "dados" não encontrada na planilha.');
+  const rows_d = XLSX.utils.sheet_to_json(ws_d, { header: 1, cellDates: true, defval: null });
+  const registros = [];
+  for (let i = 1; i < rows_d.length; i++) {
+    const r = rows_d[i];
+    const data = r[0], mat = r[1];
+    if (!data || !mat) continue;
+    if (!(data instanceof Date)) continue;
+    const wd = data.getUTCDay();
+    if (!DAY_JS[wd]) continue;
+    let o = r[7] != null ? String(r[7]).trim() : '';
+    if (o === '-' || o === 'None') o = '';
+    registros.push({
+      m: parseInt(mat),
+      d: DAY_JS[wd],
+      p: xlTimeToH(r[2]),
+      t: xlTimeToH(r[3]),
+      x: r[8] != null ? Math.round(parseFloat(r[8]) * 10000) / 10000 : 0.0,
+      o,
+    });
+  }
+
+  /* ── 3. HE Sábado (semana mais recente) ── */
+  const ws_he = wb.Sheets['HE_SABADO'];
+  if (!ws_he) throw new Error('Aba "HE_SABADO" não encontrada na planilha.');
+  const rows_he_raw = XLSX.utils.sheet_to_json(ws_he, { header: 1, defval: null });
+  const rows_he = rows_he_raw.slice(1).filter(r => r[0] != null);
+  const sem_max = rows_he.length
+    ? rows_he.reduce((mx, r) => (r[0] > mx ? r[0] : mx), rows_he[0][0])
+    : null;
+  const he_sabado = [];
+  for (const r of rows_he) {
+    if (r[0] !== sem_max) continue;
+    const mat  = r[1] != null ? parseInt(r[1]) : null;
+    const nome = r[2] != null ? String(r[2]).trim() : '';
+    const s    = r[4] != null ? String(r[4]).toUpperCase().trim() === 'SIM' : false;
+    const h    = r[6] != null ? Math.round(xlTimeToH(r[6]) * 3600) : 0;
+    const info = mat_lookup[mat] || {};
+    he_sabado.push({ mat, n: nome, setor: info.setor || null, turno: info.turno || null, s, h });
+  }
+
+  return { colabs, registros, heSabado: he_sabado };
+}
+
+function reloadFromData(newData) {
+  RAW = newData;
+  STATE = { setor: '', turno: '' };
+  document.getElementById('filter-setor').innerHTML = '<option value="">Todos os Setores</option>';
+  document.getElementById('filter-turno').innerHTML = '<option value="">Todos os Turnos</option>';
+  document.getElementById('search-colab').value = '';
+  document.getElementById('search-clear').hidden = true;
+  closeSearch();
+  populateSelects();
+  updateActiveTags();
+  renderAll();
 }
 
 /* ─────────────────────────────────────────────────────────────────
