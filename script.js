@@ -286,8 +286,11 @@ function computeMetrics(colabs, registros) {
   const hTrab  = porDia.reduce((s,d) => s + d.hTrab, 0);
   const hPerd  = porDia.reduce((s,d) => s + d.hPerd, 0);
   const efic   = hPrev > 0 ? hTrab / hPrev : 0;
-  const avgPct = efic;
   const avgPres= porDia.reduce((s,d) => s + d.presentes, 0) / porDia.length;
+  /* % presença baseada em headcount: presentes / ideal por dia */
+  const avgPct = avgIdeal > 0
+    ? porDia.reduce((s,d) => s + d.presentes / avgIdeal, 0) / porDia.length
+    : 0;
 
   /* Headcount por status — aba Dados_Colaboradores filtrada por setor+turno
      Ideal = Ativos + Vagas Abertas (exclui Afastados conforme regra de negócio) */
@@ -441,7 +444,7 @@ function renderKPIs(m) {
 function renderDailyTable(m) {
   document.getElementById('daily-tbody').innerHTML =
     m.porDia.map(d => {
-      const pct = d.hPrev > 0 ? d.hTrab / d.hPrev : 0;
+      const pct = m.avgIdeal > 0 ? d.presentes / m.avgIdeal : 0;
       return `
         <tr class="dtable__row--clickable" data-dia="${d.dia}" title="Clique para ver detalhes de ${d.dia}">
           <td class="ta-l">${d.dia}<span class="row-detail-hint">▶</span></td>
