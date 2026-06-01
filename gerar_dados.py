@@ -5,7 +5,7 @@ Execute: python gerar_dados.py
 import openpyxl
 import json
 
-XLSX = r'Dados1.xlsx'
+XLSX = r'Dados_Semana22.xlsx'
 OUT  = r'dados.js'
 
 DAY_NAMES = {0:'Segunda', 1:'Terca', 2:'Quarta', 3:'Quinta', 4:'Sexta'}

@@ -7,13 +7,13 @@
 /* ─────────────────────────────────────────────────────────────────
    CONSTANTES
    ───────────────────────────────────────────────────────────────── */
-const SEMANA   = 21;
-const PERIODO  = { ini:'18/05/2026', fim:'22/05/2026', dias:'SEGUNDA A SEXTA' };
+const SEMANA   = 22;
+const PERIODO  = { ini:'25/05/2026', fim:'29/05/2026', dias:'SEGUNDA A SEXTA' };
 const HE_PREV_H = 5;
 const DIAS_MAP  = ['Segunda','Terca','Quarta','Quinta','Sexta'];
 const DIAS_ABREV= {0:'SEG',1:'TER',2:'QUA',3:'QUI',4:'SEX'};
 const DIAS_LABEL= {Segunda:'Segunda',Terca:'Terça',Quarta:'Quarta',Quinta:'Quinta',Sexta:'Sexta'};
-const DATAS_MAP = {Segunda:'18/05',Terca:'19/05',Quarta:'20/05',Quinta:'21/05',Sexta:'22/05'};
+const DATAS_MAP = {Segunda:'25/05',Terca:'26/05',Quarta:'27/05',Quinta:'28/05',Sexta:'29/05'};
 
 /* ─────────────────────────────────────────────────────────────────
    ESTADO GLOBAL
