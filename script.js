@@ -554,8 +554,9 @@ function openDayDetail(dia, m) {
       else if (motU.includes('AFASTAMENTO') || motU.includes('LICENCA')) { tipo = 'afas';     tipoLabel = 'AFASTAMENTO'; }
       else if (r.t === 0 && r.p > 0)                          { tipo = 'falta';    tipoLabel = 'AUSENTE'; }
 
-      const hPerdVal = Math.max(0, r.p - r.t);
-      const hPerd = hPerdVal > 0 ? F.h(hPerdVal) : '—';
+      const isBatida = motU.includes('BATIDA');
+      const hPerdVal = (!isBatida && r.p > 0) ? Math.max(0, r.p - r.t) : 0;
+      const hPerd    = hPerdVal > 0 ? F.h(hPerdVal) : '—';
       return `
         <tr>
           <td class="col-n">${i+1}</td>
@@ -586,7 +587,10 @@ function openDayDetail(dia, m) {
             <td colspan="2" class="ta-l">TOTAL</td>
             <td colspan="2">${linhas.length} registro(s)</td>
             <td>—</td>
-            <td>${F.h(linhas.reduce((s,r)=>s+Math.max(0,r.p-r.t),0))}</td>
+            <td>${F.h(linhas.reduce((s,r)=>{
+              const mot2=(r.o||'').toUpperCase();
+              return s + (mot2.includes('BATIDA') ? 0 : Math.max(0,r.p-r.t));
+            },0))}</td>
           </tr>
         </tfoot>
       </table>`;
