@@ -48,6 +48,7 @@
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 [hidden] { display: none !important; }
+button, a, select, input, label[for] { touch-action: manipulation; }
 html  { font-size: 13px; }
 body  {
   font-family: var(--f-sans);
@@ -667,7 +668,10 @@ body  {
   outline: none;
   min-width: 0;
 }
-.he-filter__input:focus { border-color: var(--blue); }
+.he-filter__input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px rgba(22,85,168,.15);
+}
 .he-filter__input::placeholder { color: var(--text3); }
 
 /* HE footer cells */
